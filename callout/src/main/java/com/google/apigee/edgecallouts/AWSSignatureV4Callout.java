@@ -98,12 +98,6 @@ public class AWSSignatureV4Callout implements Execution {
 
 		signer.sign(request, new BasicAWSCredentials(key, secret));
 
-		if (content != null) {
-			request.addHeader(X_AMZ_CONTENT_SHA256, sha256(content));
-		} else {
-			request.addHeader(X_AMZ_CONTENT_SHA256, sha256(""));
-		}
-
 		return request;
 	}
 
