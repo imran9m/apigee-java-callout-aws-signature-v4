@@ -38,6 +38,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class AWSSignatureV4Callout implements Execution {
 
@@ -63,7 +64,7 @@ public class AWSSignatureV4Callout implements Execution {
 		return DatatypeConverter.printHexBinary(hash).toLowerCase();
 	}
 
-	private static Request<Void> getSignedRequest(Message msg, String endpoint, String region, String service, String key, String secret) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+	private static Map<String, String> getSignedRequest(Message msg, String endpoint, String region, String service, String key, String secret) throws UnsupportedEncodingException, NoSuchAlgorithmException {
 
 		String verb = msg.getVariable(VERB_PROP);
 		String resource = msg.getVariable(PATH_PROP);
@@ -77,18 +78,22 @@ public class AWSSignatureV4Callout implements Execution {
 		signer.setRegionName(region);
 		signer.setServiceName(request.getServiceName());
 
+		TreeMap<String, String> requestHeaders = new TreeMap<>();
 		for (String headerName : msg.getHeaderNames()) {
 			List<String> headerValues = msg.getHeaders(headerName);
 			for (String headerValue : headerValues) {
 				request.addHeader(headerName, headerValue);
+				requestHeaders.put(headerName,headerValue);
 			}
 		}
-
+		TreeMap<String, String> queryParameters = new TreeMap<>();
 		for (String queryParamName : msg.getQueryParamNames()) {
 			List<String> queryParamValues = msg.getQueryParams(queryParamName);
 			for (String queryParamValue : queryParamValues) {
 				request.addParameter(queryParamName, queryParamValue);
+				queryParameters.put(queryParamName,queryParamValue);
 			}
+
 		}
 
 		String content = msg.getContent();
@@ -96,9 +101,18 @@ public class AWSSignatureV4Callout implements Execution {
 			request.setContent(new StringInputStream(content));
 		}
 
-		signer.sign(request, new BasicAWSCredentials(key, secret));
+		AWSV4Auth awsv4Auth = new AWSV4Auth.Builder(key,secret)
+				.regionName(region)
+				.serviceName(request.getServiceName())
+				.httpMethodName(request.getHttpMethod().name())
+				.canonicalURI(request.getResourcePath())
+				.queryParametes(queryParameters)
+				.awsHeaders(requestHeaders)
+				.payload(msg.getContent())
+				.debug()
+				.build();
 
-		return request;
+		return awsv4Auth.getHeaders();
 	}
 
 
@@ -145,7 +159,7 @@ public class AWSSignatureV4Callout implements Execution {
 			String resource = (String) msg.getVariable(PATH_PROP);
 
 
-			Request<Void> request = getSignedRequest(msg, endpoint, region, service, key, secret);
+			Map<String, String> headers = getSignedRequest(msg, endpoint, region, service, key, secret);
 
 			if (debug) {
 				dbg.setVar(VERB_PROP, verb);
@@ -156,8 +170,6 @@ public class AWSSignatureV4Callout implements Execution {
 				dbg.setVar(KEY_PROP, key);
 				dbg.setVar(SECRET_PROP, secret);
 			}
-
-			Map<String, String> headers = request.getHeaders();
 
 			for(Map.Entry<String, String> headerEntry : headers.entrySet()) {
 				String headerName = headerEntry.getKey();
