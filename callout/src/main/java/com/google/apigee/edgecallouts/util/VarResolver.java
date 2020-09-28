@@ -68,7 +68,7 @@ public class VarResolver {
             return (T) value;
         }
 
-        if (clz.equals(Boolean.class) &&  (value instanceof String) &&
+        if (clz.equals(Boolean.class) && (value instanceof String) &&
                 ("true".equalsIgnoreCase((String) value)) ||
                 ("false".equalsIgnoreCase((String) value))) {
             return (T) Boolean.valueOf((String) value);
@@ -99,7 +99,7 @@ public class VarResolver {
         }
 
         if (propValue instanceof String) {
-            String varValue = replaceAllRefs((String)propValue);
+            String varValue = replaceAllRefs((String) propValue);
 
             return tryConvert(varValue, clz, defaultValue);
 
@@ -108,19 +108,18 @@ public class VarResolver {
         return tryConvert(propValue, clz, defaultValue);
     }
 
-    public  String replaceAllRefs(String propValue) {
+    public String replaceAllRefs(String propValue) {
         String rx = "(\\{[a-zA-Z0-9-.]+\\})";
 
         StringBuffer sb = new StringBuffer();
         Pattern p = Pattern.compile(rx);
         Matcher m = p.matcher(propValue);
 
-        while (m.find())
-        {
-            String varName =  trimFirstAndLast(m.group(1));
+        while (m.find()) {
+            String varName = trimFirstAndLast(m.group(1));
 
             String replacement = getVar(varName, String.class, "");
-            if (replacement != null){
+            if (replacement != null) {
                 m.appendReplacement(sb, replacement);
             }
         }

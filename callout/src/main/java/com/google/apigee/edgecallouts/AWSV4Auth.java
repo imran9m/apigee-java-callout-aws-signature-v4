@@ -1,24 +1,20 @@
 package com.google.apigee.edgecallouts;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.TreeMap;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import java.util.*;
 
 /**
  * Example: Signing AWS Requests with Signature Version 4 in Java.
  *
- * @reference: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
  * @author javaQuery
+ * @reference: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
  * @date 19th January, 2016
  * @Github: https://github.com/javaquery/Examples
  */
@@ -317,8 +313,7 @@ public class AWSV4Auth {
      * @param key
      * @return
      * @throws Exception
-     * @reference:
-     * http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-java
+     * @reference: http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-java
      */
     private byte[] HmacSHA256(byte[] key, String data) throws Exception {
         String algorithm = "HmacSHA256";
@@ -336,8 +331,7 @@ public class AWSV4Auth {
      * @param serviceName
      * @return
      * @throws Exception
-     * @reference
-     * http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-java
+     * @reference http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-java
      */
     private byte[] getSignatureKey(String key, String date, String regionName, String serviceName) throws Exception {
         byte[] kSecret = ("AWS4" + key).getBytes("UTF8");
@@ -392,13 +386,13 @@ public class AWSV4Auth {
      * Using {@link URLEncoder#encode(java.lang.String, java.lang.String) } instead of
      * {@link URLEncoder#encode(java.lang.String) }
      *
+     * @param param
+     * @return
      * @co-author https://github.com/dotkebi
      * @date 16th March, 2017
      * @git #1
-     * @param param
-     * @return
      */
-    private String encodeParameter(String param){
+    private String encodeParameter(String param) {
         try {
             return URLEncoder.encode(param, "UTF-8");
         } catch (Exception e) {

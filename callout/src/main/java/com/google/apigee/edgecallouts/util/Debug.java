@@ -26,6 +26,6 @@ public class Debug {
     }
 
     public void setVar(String name, String value) {
-        msgCtx.setVariable(prefix + ".debug."+name, value);
+        msgCtx.setVariable(prefix + ".debug." + name, value);
     }
 }
