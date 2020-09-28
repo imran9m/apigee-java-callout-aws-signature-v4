@@ -94,12 +94,16 @@ public class AWSSignatureV4Callout implements Execution {
 		String content = msg.getContent();
 		if (content != null) {
 			request.setContent(new StringInputStream(content));
+		}
+
+		signer.sign(request, new BasicAWSCredentials(key, secret));
+
+		if (content != null) {
 			request.addHeader(X_AMZ_CONTENT_SHA256, sha256(content));
 		} else {
 			request.addHeader(X_AMZ_CONTENT_SHA256, sha256(""));
 		}
 
-		signer.sign(request, new BasicAWSCredentials(key, secret));
 		return request;
 	}
 
